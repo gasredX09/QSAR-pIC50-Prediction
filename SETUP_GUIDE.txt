@@ -1,0 +1,315 @@
+================================================================================
+QSAR pIC50 PREDICTION - SETUP & GRADING GUIDE
+================================================================================
+Project: Computational Drug Discovery for Acetylcholinesterase
+Author: Aryan Sharan Reddy Guda
+Course: [Your Course Name/Number]
+Due Date: Friday, December 5, 2025 @ 8pm
+
+================================================================================
+QUICK START (For Graders)
+================================================================================
+
+ESTIMATED SETUP TIME: 5-10 minutes
+
+PREREQUISITES:
+1. Python 3.8 or higher (check: python3 --version)
+2. Java 8 (check: java -version)
+   - Required for PaDEL-Descriptor compatibility
+   - Download: https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html
+   - Or use OpenJDK 8
+
+STEP-BY-STEP SETUP:
+
+1. EXTRACT THE ZIP FILE
+   - Unzip the project folder to your desired location
+   - Navigate into the folder: cd QSAR-pIC50-Prediction
+
+2. CREATE VIRTUAL ENVIRONMENT (Recommended)
+   Windows:
+       python -m venv venv
+       venv\Scripts\activate
+
+   macOS/Linux:
+       python3 -m venv venv
+       source venv/bin/activate
+
+3. INSTALL DEPENDENCIES
+   pip install -r requirements.txt
+
+   NOTE: If RDKit installation fails, try:
+       conda install -c conda-forge rdkit
+   (RDKit is optional for the main demo but required for full pipeline)
+
+4. VERIFY JAVA IS INSTALLED
+   java -version
+   
+   (Java is required for PaDEL molecular descriptor calculations)
+
+================================================================================
+HOW TO RUN THE PROJECT
+================================================================================
+
+OPTION 1: STREAMLIT WEB APP (RECOMMENDED FOR GRADING)
+-------------------------------------------------------
+This is the easiest way to see the project in action!
+
+Command:
+    streamlit run app/app.py
+
+What happens:
+- Opens browser automatically at http://localhost:8501
+- Shows interactive web interface for bioactivity prediction
+- You can upload SMILES files and get predictions
+
+Test with provided example:
+1. Click "Browse files" in the sidebar
+2. Upload: app/example_acetylcholinesterase.txt
+3. Click "Predict" button
+4. View calculated descriptors and pIC50 predictions
+5. Download results as CSV
+
+Expected output:
+- Table showing input molecules
+- Calculated molecular descriptors (1800+ features)
+- Predicted pIC50 values for each molecule
+
+
+OPTION 2: FULL PIPELINE (Command Line)
+---------------------------------------
+Runs complete data science workflow from scratch.
+
+Command:
+    python project_main.py
+
+What happens:
+1. Fetches bioactivity data from ChEMBL database (may take 1-2 minutes)
+2. Cleans and preprocesses the data
+3. Generates molecular descriptors using PaDEL
+4. Trains Random Forest regression model
+5. Compares multiple ML algorithms
+6. Saves trained model to model/final_model.pkl
+
+Expected output:
+- Console logs showing progress
+- Generated files in data/processed/ and data/descriptors/
+- Trained model saved in model/
+- Results saved in results/
+
+
+OPTION 3: JUPYTER NOTEBOOKS (Exploratory)
+------------------------------------------
+For step-by-step analysis and visualization.
+
+Command:
+    jupyter notebook notebooks/
+
+Run notebooks in order:
+1. 01_data_preprocessing.ipynb
+2. 02_exploratory_data_analysis.ipynb
+3. 03_descriptor_generation.ipynb
+4. 04_model_training.ipynb
+5. 05_compare_regressors.ipynb
+
+================================================================================
+KEY FEATURES TO GRADE
+================================================================================
+
+1. DATA ACQUISITION & CLEANING (DatasetBuilder class)
+   - Automated ChEMBL API integration
+   - Intelligent target filtering (human, single protein)
+   - IC50 to pIC50 conversion
+   - Bioactivity classification (active/inactive/intermediate)
+   Location: src/dataset_builder.py
+
+2. MOLECULAR DESCRIPTOR GENERATION (DescriptorEngine class)
+   - PaDEL-Descriptor integration
+   - SMILES file handling
+   - 1800+ molecular features computed
+   Location: src/descriptor_engine.py
+
+3. MACHINE LEARNING MODEL (ActivityModel class)
+   - Random Forest regression
+   - Feature preprocessing (zero-variance removal)
+   - Model serialization with feature names
+   - Train/test split with performance metrics
+   Location: src/activity_model.py
+
+4. MODEL COMPARISON (ModelComparator class)
+   - Benchmarks 4 algorithms: RF, GradientBoosting, SVR, KNN
+   - Cross-validation
+   - Performance comparison table
+   Location: src/model_comparator.py
+
+5. OBJECT-ORIENTED DESIGN (Molecule class)
+   - Clean abstraction for molecular data
+   - pIC50 calculation logic
+   - Serialization methods
+   Location: src/molecule.py
+
+6. WEB APPLICATION (Streamlit Interface)
+   - File upload (CSV, TXT, SMI formats)
+   - Real-time prediction
+   - Downloadable results
+   - Error handling
+   Location: app/app.py
+
+7. EXPLORATORY DATA ANALYSIS (EDAEngine class)
+   - Statistical summaries
+   - Data quality checks
+   - Export to CSV
+   Location: src/eda_engine.py
+
+================================================================================
+GRADING SHORTCUTS
+================================================================================
+
+Since this is a data science/ML project (not a game), there are no keyboard
+shortcuts. Instead, use these quick demonstrations:
+
+SHORTCUT 1: Quick Demo (1 minute)
+    1. Run: streamlit run app/app.py
+    2. Upload: app/example_acetylcholinesterase.txt
+    3. Click "Predict"
+    4. Show the prediction output table
+
+SHORTCUT 2: View Pre-trained Model
+    - Model is already trained and saved at: model/final_model.pkl
+    - You can immediately run predictions without retraining
+
+SHORTCUT 3: View Results
+    - Pre-computed results available in results/ folder:
+        * results/comparison/regressor_comparison.csv (model benchmarks)
+        * results/eda/summary_stats.csv (data statistics)
+
+SHORTCUT 4: Check Existing Data
+    - Sample dataset: data/processed/acetylcholinesterase_bioactivity.csv
+    - Descriptors: data/descriptors/descriptors.csv
+
+================================================================================
+PROJECT STRUCTURE
+================================================================================
+
+QSAR-pIC50-Prediction/
+├── project_main.py          ← Main orchestration script
+├── requirements.txt         ← Dependencies
+├── SETUP_GUIDE.txt          ← This file
+├── README.md                ← Full documentation
+│
+├── app/                     ← Web Application
+│   ├── app.py              ← Streamlit interface
+│   ├── example_acetylcholinesterase.txt  ← Test data
+│   └── PaDEL-Descriptor/   ← Molecular descriptor tool
+│
+├── src/                     ← Core OOP Classes
+│   ├── activity_model.py   ← ML model (Random Forest)
+│   ├── dataset_builder.py  ← ChEMBL data pipeline
+│   ├── descriptor_engine.py ← PaDEL integration
+│   ├── eda_engine.py       ← Statistical analysis
+│   ├── model_comparator.py ← Algorithm comparison
+│   └── molecule.py         ← Molecule abstraction
+│
+├── data/                    ← Datasets
+│   ├── processed/          ← Cleaned bioactivity data
+│   └── descriptors/        ← Molecular descriptors
+│
+├── model/                   ← Trained models
+│   └── final_model.pkl     ← Saved Random Forest
+│
+├── results/                 ← Analysis outputs
+│   ├── eda/               ← Statistical summaries
+│   └── comparison/        ← Model benchmarks
+│
+└── notebooks/               ← Jupyter notebooks (optional)
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+ISSUE: "streamlit: command not found"
+FIX: Make sure virtual environment is activated and streamlit is installed:
+     pip install streamlit
+
+ISSUE: "Java not found"
+FIX: Install Java 8 (required for PaDEL-Descriptor):
+     macOS: brew install openjdk@8
+            Then set: export JAVA_HOME=$(/usr/libexec/java_home -v 1.8)
+     
+     Ubuntu/Debian: sudo apt-get install openjdk-8-jdk
+     
+     Windows: Download from 
+     https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html
+     
+     Verify: java -version (should show 1.8.x)
+
+ISSUE: "PaDEL JAR not found"
+FIX: Check that app/PaDEL-Descriptor/PaDEL-Descriptor.jar exists in the 
+     extracted folder. This file must be included in the submission.
+
+ISSUE: RDKit import error
+FIX: RDKit is only needed for the full pipeline (project_main.py).
+     The web app (app.py) works without it.
+     To install: conda install -c conda-forge rdkit
+
+ISSUE: ChEMBL API timeout
+FIX: This is a network/API rate-limit issue. The pre-trained model and
+     example data allow grading without re-fetching from ChEMBL.
+
+ISSUE: Port 8501 already in use
+FIX: Kill existing Streamlit process or use a different port:
+     streamlit run app/app.py --server.port 8502
+
+================================================================================
+TESTING CHECKLIST FOR GRADERS
+================================================================================
+
+[ ] Python 3.8+ installed
+[ ] Java installed (java -version works)
+[ ] Virtual environment created and activated
+[ ] Dependencies installed (pip install -r requirements.txt)
+[ ] Streamlit app launches (streamlit run app/app.py)
+[ ] Example file uploads successfully
+[ ] Predictions generate correctly
+[ ] Can download prediction results as CSV
+
+Optional (if time permits):
+[ ] Run full pipeline (python project_main.py)
+[ ] Open Jupyter notebooks
+[ ] Review generated files in data/ and results/
+
+================================================================================
+EXPECTED GRADING TIME
+================================================================================
+
+- Setup: 5-10 minutes
+- Web app demo: 2-3 minutes
+- Code review: 10-15 minutes
+- Total: ~20-30 minutes
+
+================================================================================
+VIDEO DEMONSTRATION
+================================================================================
+
+A 1-2 minute video demonstration is available at:
+[VIDEO LINK TO BE INSERTED]
+
+The video covers:
+1. Quick setup verification
+2. Running the Streamlit web app
+3. Uploading sample SMILES file
+4. Viewing prediction results
+5. Key features overview
+
+================================================================================
+CONTACT & QUESTIONS
+================================================================================
+
+If you encounter any issues during grading, please contact:
+[Your email or course communication channel]
+
+Video link: [TO BE ADDED]
+GitHub: https://github.com/gasredX09/QSAR-pIC50-Prediction
+
+================================================================================
+END OF SETUP GUIDE
+================================================================================
