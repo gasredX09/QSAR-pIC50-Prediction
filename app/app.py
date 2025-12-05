@@ -9,8 +9,9 @@ import pickle
 
 # Molecular descriptor calculator
 def desc_calc():
-    # Performs the descriptor calculation
-    bashCommand = "java -Xms2G -Xmx2G -Djava.awt.headless=true -jar ./PaDEL-Descriptor/PaDEL-Descriptor.jar -removesalt -standardizenitro -fingerprints -descriptortypes ./PaDEL-Descriptor/PubchemFingerprinter.xml -dir ./ -file descriptors_output.csv"
+    # Performs the descriptor calculation - MUST match training settings
+    # Training used: -2d -fingerprints -descriptortypes descriptors.xml
+    bashCommand = "java -Xms2G -Xmx2G -Djava.awt.headless=true -jar ./PaDEL-Descriptor/PaDEL-Descriptor.jar -removesalt -standardizenitro -2d -fingerprints -descriptortypes ./PaDEL-Descriptor/descriptors.xml -dir ./ -file descriptors_output.csv"
     process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     os.remove("molecule.smi")
@@ -26,13 +27,23 @@ def filedownload(df):
 
 # Model building
 def build_model(input_data):
-    # Reads in saved regression model
-    load_model = pickle.load(open("../model/final_model.pkl", "rb"))
-    # Apply model to make predictions
+    # Load saved (model, feature_names)
+    load_model, feature_names = pickle.load(open("../model/final_model.pkl", "rb"))
+
+    # Match descriptor columns to model's training features
+    for col in feature_names:
+        if col not in input_data.columns:
+            input_data[col] = 0
+
+    input_data = input_data[feature_names]
+
+    # Make predictions
     prediction = load_model.predict(input_data)
+
     st.header("**Prediction output**")
     prediction_output = pd.Series(prediction, name="pIC50")
     molecule_name = pd.Series(load_data[1], name="molecule_name")
+
     df = pd.concat([molecule_name, prediction_output], axis=1)
     st.write(df)
     st.markdown(filedownload(df), unsafe_allow_html=True)
@@ -50,7 +61,8 @@ st.markdown("""
 This app allows you to predict the bioactivity towards inhibting the `Acetylcholinesterase` enzyme. `Acetylcholinesterase` is a drug target for Alzheimer's disease.
 
 **Credits**
-- App built in `Python` + `Streamlit`.
+- Data source: [ChEMBL Database](https://www.ebi.ac.uk/chembl/)
+- App built in `Python` + `Streamlit` with OpenAI's ChatGPT and GitHub Copilot assistance.
 - Descriptor calculated using [PaDEL-Descriptor](http://www.yapcwsoft.com/dd/padeldescriptor/) [[Read the Paper]](https://doi.org/10.1002/jcc.21707).
 ---
 """)
